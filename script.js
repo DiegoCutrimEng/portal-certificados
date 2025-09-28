@@ -1,4 +1,4 @@
-// ARQUIVO: script.js (CÓDIGO FINAL E LIMPO)
+// ARQUIVO: script.js (CÓDIGO FINAL DE PROJETO)
 
 let certificadosEncontrados = [];
 
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
             areaPrevia.classList.add('hidden');
 
             const nomeCompletoBusca = limparTexto(document.getElementById('nomeCompleto').value);
-            const nomeCursoBusca = 'OUTROS CURSOS'; // Força a busca flexível
+            const nomeCursoBusca = 'OUTROS CURSOS'; 
 
             if (!nomeCompletoBusca) {
                 mostrarMensagem('Por favor, preencha o nome completo.', true);
@@ -35,13 +35,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const response = await fetch(API_URL_CSV);
                 const csvText = await response.text();
                 
-                // PROCESSAR O CSV (Separador é ponto e vírgula)
+                // PROCESSAR O CSV 
                 const linhas = csvText.trim().split('\n');
                 let dadosCertificados = [];
 
                 for (let i = 1; i < linhas.length; i++) {
-                    // CORREÇÃO: Usando ponto e vírgula (;) como separador para compatibilidade
-                    const colunas = linhas[i].split(';'); 
+                    // CORREÇÃO FINAL: Usando a VÍRGULA (,) como separador para o CSV Universal
+                    const colunas = linhas[i].split(','); 
                     if (colunas.length < 4) continue; 
 
                     const nomeAluno = limparTexto(colunas[0]); 
@@ -104,9 +104,6 @@ document.addEventListener('DOMContentLoaded', () => {
         areaPrevia.innerHTML = html;
         areaPrevia.classList.remove('hidden'); 
         
-        // Remove rolagem suave
-        // areaPrevia.scrollIntoView({ behavior: 'smooth', block: 'start' }); 
-        
         document.getElementById('btnSim').addEventListener('click', acaoSim);
         document.getElementById('btnNao').addEventListener('click', () => mostrarMensagem(null, false)); 
     }
@@ -138,8 +135,5 @@ document.addEventListener('DOMContentLoaded', () => {
         
         areaPrevia.classList.add('hidden'); 
         mensagem.classList.remove('hidden'); 
-        
-        // Remove rolagem suave
-        // mensagem.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 });
