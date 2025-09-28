@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (form) {
         form.addEventListener('submit', async (event) => {
             event.preventDefault(); 
+            event.stopPropagation(); // <-- CORREÇÃO: Impede a rolagem dupla do navegador
 
             areaPrevia.innerHTML = '';
             mensagem.classList.add('hidden');
@@ -32,11 +33,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                // 1. LER O CONTEÚDO CSV DIRETAMENTE (Sem problemas de servidor/Bloqueio)
+                // 1. LER O CONTEÚDO CSV DIRETAMENTE
                 const response = await fetch(API_URL_CSV);
                 const csvText = await response.text();
                 
-                // 2. PROCESSAR O CSV E BUSCAR (Lógica Final)
+                // 2. PROCESSAR O CSV E BUSCAR
                 const linhas = csvText.trim().split('\n');
                 let dadosCertificados = [];
 
