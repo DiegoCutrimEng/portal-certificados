@@ -1,4 +1,4 @@
-// ARQUIVO: script.js (CÓDIGO FINAL DE PROJETO)
+// ARQUIVO: script.js (CÓDIGO FINAL E LIMPO)
 
 let certificadosEncontrados = [];
 
@@ -16,15 +16,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (form) {
         form.addEventListener('submit', async (event) => {
             event.preventDefault(); 
-            event.stopPropagation(); // Impede a rolagem dupla
+            event.stopPropagation(); // Impede a ação dupla do navegador
 
             areaPrevia.innerHTML = '';
             mensagem.classList.add('hidden');
             areaPrevia.classList.add('hidden');
 
             const nomeCompletoBusca = limparTexto(document.getElementById('nomeCompleto').value);
-            // Nome do curso é fixo como 'OUTROS CURSOS' para forçar a busca flexível por nome
-            const nomeCursoBusca = 'OUTROS CURSOS'; 
+            const nomeCursoBusca = 'OUTROS CURSOS'; // Força a busca flexível
 
             if (!nomeCompletoBusca) {
                 mostrarMensagem('Por favor, preencha o nome completo.', true);
@@ -32,16 +31,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                // 1. LER O CONTEÚDO CSV DIRETAMENTE
+                // LER O CONTEÚDO CSV DIRETAMENTE
                 const response = await fetch(API_URL_CSV);
                 const csvText = await response.text();
                 
-                // 2. PROCESSAR O CSV (Separador é ponto e vírgula)
+                // PROCESSAR O CSV (Separador é ponto e vírgula)
                 const linhas = csvText.trim().split('\n');
                 let dadosCertificados = [];
 
                 for (let i = 1; i < linhas.length; i++) {
-                    // CORREÇÃO APLICADA: Usando ponto e vírgula (;) como separador
+                    // CORREÇÃO: Usando ponto e vírgula (;) como separador para compatibilidade
                     const colunas = linhas[i].split(';'); 
                     if (colunas.length < 4) continue; 
 
@@ -52,7 +51,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     const buscaFlexivel = nomeCursoBusca === 'OUTROS CURSOS';
 
-                    // COMPARAÇÃO FINAL: Busca apenas por nome (flexível)
                     if (nomeAluno === nomeCompletoBusca && buscaFlexivel) {
                         dadosCertificados.push({
                             nome_completo: colunas[0].trim(),
@@ -77,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- FUNÇÕES DE EXIBIÇÃO DE RESULTADOS E DOWNLOAD (sem alteração) ---
+    // --- FUNÇÕES DE EXIBIÇÃO DE RESULTADOS E DOWNLOAD ---
 
     function mostrarPreviaCertificados(certificados) {
         let html = '<h2>Prévia do(s) Seu(s) Certificado(s)</h2>';
@@ -106,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
         areaPrevia.innerHTML = html;
         areaPrevia.classList.remove('hidden'); 
         
-        // Remove a rolagem suave para resolver o flicker
+        // Remove rolagem suave
         // areaPrevia.scrollIntoView({ behavior: 'smooth', block: 'start' }); 
         
         document.getElementById('btnSim').addEventListener('click', acaoSim);
@@ -141,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
         areaPrevia.classList.add('hidden'); 
         mensagem.classList.remove('hidden'); 
         
-        // Remove a rolagem suave para resolver o flicker
+        // Remove rolagem suave
         // mensagem.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 });
