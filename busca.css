@@ -1,5 +1,17 @@
 /* GERAL E FUNDO CINZA */
+body {/* GERAL E FUNDO CINZA */
 body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #e0e0e0;
+    color: #333;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    /* --- CORREÇÃO FINAL: BLOQUEIA QUALQUER ROLAGEM INDESEJADA --- */
+    overflow-y: auto; /* Permite a barra de rolagem vertical */
+    scroll-behavior: auto !important; /* Ação: ANULA o scroll suave do navegador */
+    /* ---------------------------------------------------------------- */
+}
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #e0e0e0; /* Fundo cinza suave */
     color: #333;
