@@ -1,4 +1,4 @@
-// ARQUIVO: script.js (versão Google Drive)
+// ARQUIVO: script.js (versão Planilha HTML + Google Drive)
 
 let certificadosEncontrados = [];
 
@@ -7,9 +7,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const areaPrevia = document.getElementById('areaPrevia');
     const mensagem = document.getElementById('mensagem');
     
-    // URL da planilha publicada em CSV
-    const API_URL_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQYKOLT1mPc9wRiKUSzfNp_Ujy0fhOGcTdki6FrEpKYH-d0Dh0P50AjVr3FEXxdpFCZKvTyCLbutPBV/pub?output=csv'; 
-    
+    // URL da planilha publicada em HTML
+    const API_URL_HTML = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQYKOLT1mPc9wRiKUSzfNp_Ujy0fhOGcTdki6FrEpKYH-d0Dh0P50AjVr3FEXxdpFCZKvTyCLbutPBV/pubhtml';
+
     // Função para limpar e padronizar o texto
     const limparTexto = (texto) => String(texto).toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, ' ').trim();
 
@@ -31,33 +31,39 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                const response = await fetch(API_URL_CSV);
-                const csvText = await response.text();
+                // Busca e parse do HTML da planilha
+                const response = await fetch(API_URL_HTML);
+                const htmlText = await response.text();
                 
-                const linhas = csvText.trim().split('\n');
+                // Criar um DOM temporário para extrair os dados
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(htmlText, 'text/html');
+                
+                // Seleciona todas as linhas da planilha (tr)
+                const linhas = Array.from(doc.querySelectorAll('table tbody tr'));
                 let dadosCertificados = [];
 
-                for (let i = 1; i < linhas.length; i++) {
-                    const colunas = linhas[i].split(','); 
-                    if (colunas.length < 4) continue; 
+                linhas.forEach((linha) => {
+                    const colunas = Array.from(linha.querySelectorAll('td')).map(td => td.textContent.trim());
+                    if (colunas.length < 4) return;
 
-                    const nomeAluno = limparTexto(colunas[0]); 
-                    const nomeCurso = limparTexto(colunas[1]); 
-                    const filial = colunas[2].trim();          
-                    const urlPdf = colunas[3].trim();          
-                    
+                    const nomeAluno = limparTexto(colunas[0]);
+                    const nomeCurso = limparTexto(colunas[1]);
+                    const filial = colunas[2];
+                    const urlPdf = colunas[3];
+
                     const buscaFlexivel = nomeCursoBusca === 'OUTROS CURSOS';
 
                     if (nomeAluno === nomeCompletoBusca && buscaFlexivel) {
                         dadosCertificados.push({
-                            nome_completo: colunas[0].trim(),
-                            nome_curso: colunas[1].trim(),
+                            nome_completo: colunas[0],
+                            nome_curso: colunas[1],
                             instituicao_filial: filial,
                             url_download: formatarLinkDrive(urlPdf)
                         });
                     }
-                }
-                
+                });
+
                 if (dadosCertificados.length > 0) {
                     certificadosEncontrados = dadosCertificados;
                     mostrarPreviaCertificados(certificadosEncontrados);
@@ -66,8 +72,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
             } catch (error) {
-                console.error('Erro de leitura do CSV ou Planilha:', error);
-                mostrarMensagem('Erro: Não foi possível ler os dados da Planilha. Verifique se o link CSV está correto e publicado.', true);
+                console.error('Erro ao ler a planilha HTML:', error);
+                mostrarMensagem('Erro: Não foi possível ler os dados da Planilha. Verifique se o link está correto.', true);
             }
         });
     }
@@ -108,7 +114,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function acaoSim() {
         if (certificadosEncontrados.length > 0) {
             const urlPdf = certificadosEncontrados[0].url_download; 
-            
             if (urlPdf) {
                 window.open(urlPdf, '_blank');
             } else {
@@ -126,10 +131,8 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         
         mensagem.innerHTML = customMessage ? `<p>${customMessage}</p>` : defaultMessage;
-        
         mensagem.style.backgroundColor = isError ? '#f8d7da' : '#fff3cd'; 
         mensagem.style.color = isError ? '#721c24' : '#856404';
-        
         areaPrevia.classList.add('hidden'); 
         mensagem.classList.remove('hidden'); 
     }
