@@ -52,23 +52,18 @@ main {
 .texto-container {
     width: 45%; 
     padding-right: 20px;
-    /* Usada para o texto na home */
 }
 .banner-img-container {
     width: 50%;
     margin-bottom: 0;
     padding: 0 10px;
-    /* Usada para a imagem na home, ou formulário na busca */
 }
-
-/* ------------------------------------- */
-/* ESTILOS PROFISSIONAIS PARA O FORMULÁRIO (busca.html) */
-/* ------------------------------------- */
 .busca-form-container-wrapper {
-    /* Esta classe aplica a largura de 45% à coluna do formulário */
     width: 45%; 
     padding-right: 20px;
 }
+
+/* --- ESTILOS PROFISSIONAIS PARA O FORMULÁRIO --- */
 .busca-form-box {
     background-color: #ffffff; 
     padding: 30px; 
@@ -77,7 +72,6 @@ main {
     border: 1px solid #ddd;
 }
 
-/* Títulos e Inputs */
 .busca-form-box h2 {
     color: #007bff;
     text-align: center;
@@ -86,6 +80,7 @@ main {
     border-bottom: 2px solid #f0f0f0;
     padding-bottom: 10px;
 }
+
 .busca-form-box label {
     display: block;
     margin: 18px 0 6px;
@@ -93,22 +88,19 @@ main {
     font-size: 1.1em; 
     color: #444;
 }
-.busca-form-box input[type="text"] {
+
+.busca-form-box input[type="text"],
+.busca-form-box select { /* Garante estilo para o select, se ele estivesse visível */
     width: 100%;
     padding: 12px; 
-    margin-bottom: 20px;
+    margin-bottom: 20px; /* Espaço após o campo (inclui o campo oculto) */
     border: 2px solid #ccc; 
     border-radius: 6px; 
     box-sizing: border-box;
     font-size: 1.1em; 
-    transition: border-color 0.3s;
-}
-.busca-form-box input[type="text"]:focus {
-    border-color: #007bff; 
-    outline: none;
 }
 
-/* BOTÃO PRINCIPAL (Dourado, Cantos Arredondados) */
+/* BOTÃO PRINCIPAL (Dourado) */
 .btn-principal {
     display: inline-block;
     background-color: #FFD700; 
@@ -120,37 +112,25 @@ main {
     font-weight: bold;
     transition: background-color 0.3s, transform 0.2s;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-    width: 100%; /* Preencher a largura do formulário */
+    width: 100%;
+    margin-top: 5px; /* Pequena margem para garantir espaço do campo oculto */
 }
 
-/* Animação para a HOME (Sobe e Desce) */
-@keyframes bounce-home {
-    0% { transform: translateY(0); }
-    100% { transform: translateY(-10px); } 
-}
-
-/* Animação para a BUSCA (Esquerda e Direita) */
+/* ESTILOS DE ANIMAÇÃO */
 @keyframes move-horizontal {
     0% { transform: translateX(0); }
     100% { transform: translateX(20px); } 
 }
-
-#formando-img-animada-home {
-    animation: bounce-home 4s infinite alternate ease-in-out;
-}
 #formando-img-animada-busca {
     animation: move-horizontal 4s infinite alternate ease-in-out;
 }
-
 .banner-img {
     width: 100%;
     height: auto;
     display: block; 
 }
 
-/* ------------------------------------- */
 /* ESTILOS DE RESULTADOS E MENSAGENS */
-/* ------------------------------------- */
 .hidden { display: none; }
 .certificado-previa {
     margin: 20px 0;
@@ -159,23 +139,6 @@ main {
     border-radius: 8px;
     background-color: #fff;
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-}
-.confirma-acao {
-    margin-top: 30px;
-    padding: 20px;
-    background-color: #f0f0f0;
-    border-radius: 8px;
-    text-align: center;
-}
-.confirma-acao .btn-principal {
-    width: 45%; 
-    margin: 10px 5px;
-    padding: 10px;
-    font-size: 1em;
-}
-.confirma-acao .btn-secundario {
-    background-color: #dc3545; 
-    color: white;
 }
 .mensagem-orientacao {
     padding: 25px;
@@ -186,9 +149,7 @@ main {
     text-align: center;
     border: 2px solid;
 }
-/* ------------------------------------- */
-/* ESTILOS REDES SOCIAIS E RESPONSIVIDADE */
-/* ------------------------------------- */
+/* Estilos de Redes Sociais e Responsividade */
 .social-links-container {
     display: flex;
     flex-direction: column; 
@@ -196,90 +157,4 @@ main {
     gap: 10px; 
     margin-top: 15px;
 }
-.social-link {
-    display: flex; 
-    align-items: center;
-    justify-content: flex-start; 
-    text-decoration: none;
-    color: #007bff;
-    width: 300px;
-}
-.instagram-link i { color: #E1306C; }
-.site-link i { color: #00A86B; }
-
-@media (max-width: 900px) {
-    .texto-container, .banner-img-container, .busca-form-container-wrapper {
-        width: 100%;
-        padding: 0;
-        margin-bottom: 20px;
-    }
-    .logo { height: 50px; }
-    .btn-principal { width: 90%; font-size: 1.2em; }
-}
-/* Estilo para a Mensagem Motivacional abaixo do Botão */
-.motivacao-final {
-    text-align: center;
-    margin: 20px auto 40px; /* Margem para separar do botão e do rodapé */
-    max-width: 600px;
-}
-
-.motivacao-final h3 {
-    color: #070707; /* Azul institucional */
-    font-size: 25px;
-    margin-bottom: 5px;
-}
-
-.motivacao-final p {
-    font-size: 20px;
-    color: #7943f5;
-}
-
-
-/* ... (Seções body, header, logo-bar, logo, main, parabens-section, texto-container, banner-img-container sem alteração) ... */
-
-/* ------------------------------------- */
-/* ESTILOS PROFISSIONAIS PARA O FORMULÁRIO (busca.html) */
-/* ------------------------------------- */
-
-/* ... (demais estilos do formbox sem alteração) ... */
-
-/* Estilo para a nova tag SELECT (Lista Suspensa) */
-.busca-form-box select {
-    width: 100%;
-    padding: 12px; 
-    /* AUMENTAMOS o margin-bottom para criar ESPAÇO até o botão */
-    margin-bottom: 30px; 
-    border: 2px solid #ccc; 
-    border-radius: 6px; 
-    box-sizing: border-box;
-    /* AUMENTAMOS o font-size para a caixa parecer maior */
-    font-size: 1.2em; 
-    height: 48px; 
-    appearance: none; 
-    background-color: white;
-}
-.busca-form-box select:focus {
-    border-color: #007bff; 
-    outline: none;
-}
-
-/* ... (demais estilos de botão principal sem alteração) ... */
-
-/* Estilo para a Mensagem Motivacional abaixo do Botão (Motivacao-final) */
-.motivacao-final {
-    text-align: center;
-    margin: 20px auto 0; /* Espaço para separar do botão */
-    padding-top: 20px;
-    border-top: 1px solid #eee;
-}
-
-/* ------------------------------------- */
-/* AJUSTE PARA CENTRALIZAR O TÍTULO DAS REDES SOCIAIS */
-/* ------------------------------------- */
-.redes-sociais {
-    text-align: center; /* Centraliza o conteúdo (incluindo o H3) */
-    padding: 20px 0;
-    margin-top: 20px;
-    border-top: 1px solid #ddd;
-}
-/* ... (demais estilos de redes sociais sem alteração) ... */
+/* ... (Mantenha o restante do seu CSS para redes sociais, rodapé e media queries) ... */
