@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const mensagem = document.getElementById('mensagem');
     
     // URL CSV FINAL (Publicado na Web). 
-    // Copie o seu link CSV que começa com https://docs.google.com/.../pub?output=csv
     const API_URL_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQYKOLT1mPc9wRiKUSzfNp_Ujy0fhOGcTdki6FrEpKYH-d0Dh0P50AjVr3FEXxdpFCZKvTyCLbutPBV/pub?output=csv'; 
     
     // Função para limpar e padronizar o texto (remove acentos, espaços extras e coloca em MAIÚSCULAS)
@@ -17,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (form) {
         form.addEventListener('submit', async (event) => {
             event.preventDefault(); 
-            event.stopPropagation(); // <-- CORREÇÃO: Impede a rolagem dupla do navegador
+            event.stopPropagation(); // Impede a rolagem dupla
 
             areaPrevia.innerHTML = '';
             mensagem.classList.add('hidden');
@@ -37,12 +36,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const response = await fetch(API_URL_CSV);
                 const csvText = await response.text();
                 
-                // 2. PROCESSAR O CSV E BUSCAR
+                // 2. PROCESSAR O CSV (Separador é ponto e vírgula)
                 const linhas = csvText.trim().split('\n');
                 let dadosCertificados = [];
 
                 for (let i = 1; i < linhas.length; i++) {
-                    const colunas = linhas[i].split(','); 
+                    // CORREÇÃO APLICADA: Usando ponto e vírgula (;) como separador
+                    const colunas = linhas[i].split(';'); 
                     if (colunas.length < 4) continue; 
 
                     const nomeAluno = limparTexto(colunas[0]); 
@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- FUNÇÕES DE EXIBIÇÃO DE RESULTADOS E DOWNLOAD ---
+    // --- FUNÇÕES DE EXIBIÇÃO DE RESULTADOS E DOWNLOAD (sem alteração) ---
 
     function mostrarPreviaCertificados(certificados) {
         let html = '<h2>Prévia do(s) Seu(s) Certificado(s)</h2>';
@@ -106,7 +106,8 @@ document.addEventListener('DOMContentLoaded', () => {
         areaPrevia.innerHTML = html;
         areaPrevia.classList.remove('hidden'); 
         
-        areaPrevia.scrollIntoView({ behavior: 'smooth', block: 'start' }); 
+        // Remove a rolagem suave para resolver o flicker
+        // areaPrevia.scrollIntoView({ behavior: 'smooth', block: 'start' }); 
         
         document.getElementById('btnSim').addEventListener('click', acaoSim);
         document.getElementById('btnNao').addEventListener('click', () => mostrarMensagem(null, false)); 
@@ -140,6 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
         areaPrevia.classList.add('hidden'); 
         mensagem.classList.remove('hidden'); 
         
-        mensagem.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Remove a rolagem suave para resolver o flicker
+        // mensagem.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 });
