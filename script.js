@@ -1,4 +1,4 @@
-// ARQUIVO: script.js (CÓDIGO FINAL DE PROJETO)
+// ARQUIVO: script.js (versão Google Drive)
 
 let certificadosEncontrados = [];
 
@@ -7,16 +7,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const areaPrevia = document.getElementById('areaPrevia');
     const mensagem = document.getElementById('mensagem');
     
-    // URL CSV FINAL (Publicado na Web). 
+    // URL da planilha publicada em CSV
     const API_URL_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQYKOLT1mPc9wRiKUSzfNp_Ujy0fhOGcTdki6FrEpKYH-d0Dh0P50AjVr3FEXxdpFCZKvTyCLbutPBV/pub?output=csv'; 
     
-    // Função para limpar e padronizar o texto (remove acentos, espaços extras e coloca em MAIÚSCULAS)
+    // Função para limpar e padronizar o texto
     const limparTexto = (texto) => String(texto).toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, ' ').trim();
 
     if (form) {
         form.addEventListener('submit', async (event) => {
             event.preventDefault(); 
-            event.stopPropagation(); // Impede a ação dupla do navegador
+            event.stopPropagation();
 
             areaPrevia.innerHTML = '';
             mensagem.classList.add('hidden');
@@ -31,16 +31,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                // LER O CONTEÚDO CSV DIRETAMENTE
                 const response = await fetch(API_URL_CSV);
                 const csvText = await response.text();
                 
-                // PROCESSAR O CSV 
                 const linhas = csvText.trim().split('\n');
                 let dadosCertificados = [];
 
                 for (let i = 1; i < linhas.length; i++) {
-                    // CORREÇÃO FINAL: Usando a VÍRGULA (,) como separador para o CSV Universal
                     const colunas = linhas[i].split(','); 
                     if (colunas.length < 4) continue; 
 
@@ -56,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             nome_completo: colunas[0].trim(),
                             nome_curso: colunas[1].trim(),
                             instituicao_filial: filial,
-                            url_download: urlPdf
+                            url_download: formatarLinkDrive(urlPdf)
                         });
                     }
                 }
@@ -75,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- FUNÇÕES DE EXIBIÇÃO DE RESULTADOS E DOWNLOAD ---
+    // --- FUNÇÕES DE EXIBIÇÃO E DOWNLOAD ---
 
     function mostrarPreviaCertificados(certificados) {
         let html = '<h2>Prévia do(s) Seu(s) Certificado(s)</h2>';
@@ -96,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
         html += `
             <div class="confirma-acao">
                 <h3>Seu(s) certificado(s) acima está(ão) correto(s)?</h3>
-                <button id="btnSim" class="btn-principal btn-sim">Sim, Baixar PDF</button>
+                <button id="btnSim" class="btn-principal btn-sim">Sim, Ver Certificado</button>
                 <button id="btnNao" class="btn-principal btn-secundario">Não, Preciso Corrigir</button>
             </div>
         `;
@@ -112,10 +109,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (certificadosEncontrados.length > 0) {
             const urlPdf = certificadosEncontrados[0].url_download; 
             
-            if (urlPdf && urlPdf.startsWith('http')) {
+            if (urlPdf) {
                 window.open(urlPdf, '_blank');
             } else {
-                 mostrarMensagem('Erro: O link de download do PDF não foi encontrado na Planilha. Contate a secretaria.', true);
+                mostrarMensagem('Erro: O link do certificado não foi encontrado. Contate a secretaria.', true);
             }
         }
     }
@@ -124,8 +121,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const defaultMessage = `
             <p>Seu certificado não foi encontrado ou está incorreto. </p>
             <p>Por favor, compareça à Secretaria da Juventude (SEMJUV) para correção. </p>
-            <p class="horario-semjuv">Disponível de **Segunda a Sexta-feira**, nos horários: <br>
-            **8:30 às 12:30**</p>
+            <p class="horario-semjuv">Disponível de <strong>Segunda a Sexta-feira</strong>, nos horários: <br>
+            <strong>8:30 às 12:30</strong></p>
         `;
         
         mensagem.innerHTML = customMessage ? `<p>${customMessage}</p>` : defaultMessage;
@@ -135,5 +132,15 @@ document.addEventListener('DOMContentLoaded', () => {
         
         areaPrevia.classList.add('hidden'); 
         mensagem.classList.remove('hidden'); 
+    }
+
+    // --- CONVERTER LINK DO DRIVE ---
+    function formatarLinkDrive(url) {
+        if (!url) return "";
+        const match = url.match(/\/d\/(.*)\/view/);
+        if (match && match[1]) {
+            return `https://drive.google.com/uc?export=download&id=${match[1]}`;
+        }
+        return url; // Se já estiver formatado
     }
 });
