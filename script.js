@@ -1,4 +1,4 @@
-// ARQUIVO: script.js (versão Planilha HTML + Google Drive)
+// ARQUIVO: script.js (GitHub Pages + PDF Preview em iframe)
 
 let certificadosEncontrados = [];
 
@@ -31,15 +31,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                // Busca e parse do HTML da planilha
                 const response = await fetch(API_URL_HTML);
                 const htmlText = await response.text();
                 
-                // Criar um DOM temporário para extrair os dados
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(htmlText, 'text/html');
                 
-                // Seleciona todas as linhas da planilha (tr)
                 const linhas = Array.from(doc.querySelectorAll('table tbody tr'));
                 let dadosCertificados = [];
 
@@ -102,6 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <button id="btnSim" class="btn-principal btn-sim">Sim, Ver Certificado</button>
                 <button id="btnNao" class="btn-principal btn-secundario">Não, Preciso Corrigir</button>
             </div>
+            <div id="iframeContainer" class="hidden" style="margin-top:20px;"></div>
         `;
 
         areaPrevia.innerHTML = html;
@@ -113,9 +111,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function acaoSim() {
         if (certificadosEncontrados.length > 0) {
-            const urlPdf = certificadosEncontrados[0].url_download; 
+            const urlPdf = certificadosEncontrados[0].url_download;
             if (urlPdf) {
-                window.open(urlPdf, '_blank');
+                const iframeContainer = document.getElementById('iframeContainer');
+                iframeContainer.innerHTML = `<iframe src="${urlPdf}" width="100%" height="600px" style="border:1px solid #ccc;"></iframe>`;
+                iframeContainer.classList.remove('hidden');
+                window.scrollTo({ top: iframeContainer.offsetTop, behavior: 'smooth' });
             } else {
                 mostrarMensagem('Erro: O link do certificado não foi encontrado. Contate a secretaria.', true);
             }
@@ -137,13 +138,13 @@ document.addEventListener('DOMContentLoaded', () => {
         mensagem.classList.remove('hidden'); 
     }
 
-    // --- CONVERTER LINK DO DRIVE ---
+    // --- CONVERTER LINK DO DRIVE PARA PREVIEW ---
     function formatarLinkDrive(url) {
         if (!url) return "";
         const match = url.match(/\/d\/(.*)\/view/);
         if (match && match[1]) {
-            return `https://drive.google.com/uc?export=download&id=${match[1]}`;
+            return `https://drive.google.com/file/d/${match[1]}/preview`;
         }
-        return url; // Se já estiver formatado
+        return url; // Se já estiver no formato preview
     }
 });
