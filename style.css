@@ -55,8 +55,9 @@ main {
 }
 
 .texto-container p {
-    font-size: 20px; /* Tamanho de 12 a 14, escolhemos 14px */
+    font-size:20px; /* Tamanho de 12 a 14, escolhemos 14px */
     text-align: justify; /* Texto justificado solicitado */
+    
 }
 
 /* ------------------------------------- */

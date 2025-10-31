@@ -1,86 +1,90 @@
-// ARQUIVO: script.js (GitHub Pages + PDF Preview em iframe)
+// ARQUIVO: script.js (VERSÃO FINAL COM CORREÇÃO DE LINKS E EXIBIÇÃO DE MÚLTIPLOS CERTIFICADOS)
 
 let certificadosEncontrados = [];
 
+// URL DA PLANILHA GOOGLE:
+const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQYKOLT1mPc9wRiKUSzfNp_Ujy0fhOGcTdki6FrEpKYH-d0Dh0P50AjVr3FEXxdpFCZKvTyCLbutPBV/pub?gid=0&single=true&output=csv';
+
+// Função para limpar e padronizar o texto
+const limparTexto = (texto) => String(texto).toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, ' ').trim();
+
+// --- FUNÇÃO PRINCIPAL PARA BUSCAR E PROCESSAR DADOS CSV ---
+async function carregarDadosPlanilha() {
+    try {
+        const response = await fetch(SHEET_URL);
+        if (!response.ok) {
+            throw new Error(`Erro ao carregar a planilha: ${response.statusText}`);
+        }
+        
+        const csvText = await response.text();
+        
+        const linhas = csvText.split('\n').slice(1).filter(line => line.trim() !== '');
+
+        return linhas.map(linha => {
+            const colunas = linha.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').trim());
+
+            return {
+                nome_completo: colunas[1] || '',
+                nome_curso: colunas[2] || 'CURSO INDEFINIDO',
+                instituicao_filial: colunas[3] || 'Filial Desconhecida',
+                url_pdf: colunas[4] || '',
+            };
+        });
+
+    } catch (error) {
+        console.error('Erro fatal ao buscar a planilha:', error);
+        return []; 
+    }
+}
+
+
+// --- LÓGICA PRINCIPAL DO EVENTO ---
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('formBuscaCertificado');
     const areaPrevia = document.getElementById('areaPrevia');
     const mensagem = document.getElementById('mensagem');
     
-    // URL da planilha publicada em HTML
-    const API_URL_HTML = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQYKOLT1mPc9wRiKUSzfNp_Ujy0fhOGcTdki6FrEpKYH-d0Dh0P50AjVr3FEXxdpFCZKvTyCLbutPBV/pubhtml';
-
-    // Função para limpar e padronizar o texto
-    const limparTexto = (texto) => String(texto).toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, ' ').trim();
+    if (areaPrevia) areaPrevia.classList.add('hidden');
+    if (mensagem) mensagem.classList.add('hidden');
 
     if (form) {
         form.addEventListener('submit', async (event) => {
             event.preventDefault(); 
             event.stopPropagation();
 
-            areaPrevia.innerHTML = '';
-            mensagem.classList.add('hidden');
-            areaPrevia.classList.add('hidden');
-
+            if (areaPrevia) areaPrevia.innerHTML = '';
+            if (mensagem) mensagem.classList.add('hidden');
+            if (areaPrevia) areaPrevia.classList.add('hidden');
+            
+            const dadosCertificados = await carregarDadosPlanilha();
             const nomeCompletoBusca = limparTexto(document.getElementById('nomeCompleto').value);
-            const nomeCursoBusca = 'OUTROS CURSOS'; 
 
             if (!nomeCompletoBusca) {
                 mostrarMensagem('Por favor, preencha o nome completo.', true);
                 return;
             }
 
-            try {
-                const response = await fetch(API_URL_HTML);
-                const htmlText = await response.text();
-                
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(htmlText, 'text/html');
-                
-                const linhas = Array.from(doc.querySelectorAll('table tbody tr'));
-                let dadosCertificados = [];
+            const encontrados = dadosCertificados.filter(c =>
+                limparTexto(c.nome_completo) === nomeCompletoBusca
+            );
 
-                linhas.forEach((linha) => {
-                    const colunas = Array.from(linha.querySelectorAll('td')).map(td => td.textContent.trim());
-                    if (colunas.length < 4) return;
-
-                    const nomeAluno = limparTexto(colunas[0]);
-                    const nomeCurso = limparTexto(colunas[1]);
-                    const filial = colunas[2];
-                    const urlPdf = colunas[3];
-
-                    const buscaFlexivel = nomeCursoBusca === 'OUTROS CURSOS';
-
-                    if (nomeAluno === nomeCompletoBusca && buscaFlexivel) {
-                        dadosCertificados.push({
-                            nome_completo: colunas[0],
-                            nome_curso: colunas[1],
-                            instituicao_filial: filial,
-                            url_download: formatarLinkDrive(urlPdf)
-                        });
-                    }
-                });
-
-                if (dadosCertificados.length > 0) {
-                    certificadosEncontrados = dadosCertificados;
-                    mostrarPreviaCertificados(certificadosEncontrados);
-                } else {
-                    mostrarMensagem(null, false);
-                }
-
-            } catch (error) {
-                console.error('Erro ao ler a planilha HTML:', error);
-                mostrarMensagem('Erro: Não foi possível ler os dados da Planilha. Verifique se o link está correto.', true);
+            if (encontrados.length > 0) {
+                certificadosEncontrados = encontrados;
+                mostrarPreviaCertificados(certificadosEncontrados);
+            } else {
+                mostrarMensagem(null, false);
             }
         });
     }
 
-    // --- FUNÇÕES DE EXIBIÇÃO E DOWNLOAD ---
-
+    // 🏆 FUNÇÃO CORRIGIDA PARA EXIBIR LINKS DE VISUALIZAÇÃO/DOWNLOAD 🏆
     function mostrarPreviaCertificados(certificados) {
-        let html = '<h2>Prévia do(s) Seu(s) Certificado(s)</h2>';
+        let html = '<h2>Confirme Seu(s) Certificado(s)</h2>';
+        let linksHtml = '';
 
         certificados.forEach((cert, index) => {
+            
+            // 1. Geração da prévia do certificado
             html += `
                 <div class="certificado-previa">
                     <h4>Certificado ${index + 1}: ${cert.nome_curso}</h4>
@@ -91,60 +95,69 @@ document.addEventListener('DOMContentLoaded', () => {
             if (certificados.length > 1 && index < certificados.length - 1) {
                 html += '<hr>';
             }
+
+            // 2. Geração dos links de visualização/download
+            const urlPdf = cert.url_pdf;
+            if (urlPdf && urlPdf.trim() !== '') {
+                
+                // ❗ CORREÇÃO FINAL: Usamos o URL original do Drive (view?usp=sharing), 
+                // que comprovadamente funciona na aba anônima.
+                const downloadUrl = urlPdf; 
+
+                linksHtml += `
+                    <a href="${downloadUrl}" target="_blank" 
+                       class="btn-principal btn-sim link-download" 
+                       style="display: block; margin-bottom: 10px; text-align: center;">
+                        Ver/Baixar Certificado ${index + 1}: ${cert.nome_curso}
+                    </a>
+                `;
+            } else {
+                 linksHtml += `
+                    <p class="aviso-link-invalido">Certificado ${index + 1}: ${cert.nome_curso} - Link indisponível na planilha. </p>
+                `;
+            }
         });
 
+        // Montagem final do HTML da área de prévia
         html += `
             <div class="confirma-acao">
                 <h3>Seu(s) certificado(s) acima está(ão) correto(s)?</h3>
-                <button id="btnSim" class="btn-principal btn-sim">Sim, Ver Certificado</button>
+                ${linksHtml}
                 <button id="btnNao" class="btn-principal btn-secundario">Não, Preciso Corrigir</button>
             </div>
-            <div id="iframeContainer" class="hidden" style="margin-top:20px;"></div>
         `;
 
-        areaPrevia.innerHTML = html;
-        areaPrevia.classList.remove('hidden'); 
-        
-        document.getElementById('btnSim').addEventListener('click', acaoSim);
-        document.getElementById('btnNao').addEventListener('click', () => mostrarMensagem(null, false)); 
-    }
-
-    function acaoSim() {
-        if (certificadosEncontrados.length > 0) {
-            const urlPdf = certificadosEncontrados[0].url_download;
-            if (urlPdf) {
-                const iframeContainer = document.getElementById('iframeContainer');
-                iframeContainer.innerHTML = `<iframe src="${urlPdf}" width="100%" height="600px" style="border:1px solid #ccc;"></iframe>`;
-                iframeContainer.classList.remove('hidden');
-                window.scrollTo({ top: iframeContainer.offsetTop, behavior: 'smooth' });
-            } else {
-                mostrarMensagem('Erro: O link do certificado não foi encontrado. Contate a secretaria.', true);
-            }
+        if (areaPrevia) {
+            areaPrevia.innerHTML = html;
+            areaPrevia.classList.remove('hidden'); 
+            
+            // O botão 'Sim' foi substituído pelos links, então só mantemos o 'Não'
+            document.getElementById('btnNao').addEventListener('click', () => mostrarMensagem(null, false)); 
+        } else {
+            console.error("Elemento 'areaPrevia' não encontrado.");
         }
     }
+    // FIM DA FUNÇÃO CORRIGIDA
 
     function mostrarMensagem(customMessage, isError) {
+        if (areaPrevia) areaPrevia.classList.add('hidden'); // Esconde a prévia
+
         const defaultMessage = `
             <p>Seu certificado não foi encontrado ou está incorreto. </p>
             <p>Por favor, compareça à Secretaria da Juventude (SEMJUV) para correção. </p>
             <p class="horario-semjuv">Disponível de <strong>Segunda a Sexta-feira</strong>, nos horários: <br>
-            <strong>8:30 às 12:30</strong></p>
+            <strong>8:30 às 17:00</strong></p>
         `;
         
-        mensagem.innerHTML = customMessage ? `<p>${customMessage}</p>` : defaultMessage;
-        mensagem.style.backgroundColor = isError ? '#f8d7da' : '#fff3cd'; 
-        mensagem.style.color = isError ? '#721c24' : '#856404';
-        areaPrevia.classList.add('hidden'); 
-        mensagem.classList.remove('hidden'); 
-    }
+        if (mensagem) {
+            mensagem.innerHTML = customMessage ? `<p>${customMessage}</p>` : defaultMessage;
+            
+            // Aplica classes de estilo
+            mensagem.className = 'mensagem-orientacao'; 
+            mensagem.style.backgroundColor = isError ? '#f8d7da' : '#fff3cd'; 
+            mensagem.style.color = isError ? '#721c24' : '#856404';
 
-    // --- CONVERTER LINK DO DRIVE PARA PREVIEW ---
-    function formatarLinkDrive(url) {
-        if (!url) return "";
-        const match = url.match(/\/d\/(.*)\/view/);
-        if (match && match[1]) {
-            return `https://drive.google.com/file/d/${match[1]}/preview`;
+            mensagem.classList.remove('hidden'); 
         }
-        return url; // Se já estiver no formato preview
     }
 });
